@@ -32,7 +32,7 @@ pub fn socketaddr_un(path: &Path) -> io::Result<(SOCKADDR_UN, i32)> {
     let socklen = size_of::<SOCKADDR_UN>() as _;
     Ok((sockaddr, socklen))
 }
-#[derive(Debug,Default)]
+#[derive(Debug, Default)]
 pub struct SocketAddr {
     pub addr: SOCKADDR_UN,
     pub addrlen: i32,

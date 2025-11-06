@@ -16,8 +16,24 @@ impl UnixStream {
             }
         }
     }
-    pub fn local_addr(&self)->io::Result<SocketAddr>{
+    pub fn connect_addr(socket_addr: &SocketAddr) -> io::Result<Self> {
+        let s = Socket::new()?;
+        match unsafe {
+            WinSock::connect(
+                s.0,
+                &socket_addr.addr as *const _ as *const _,
+                socket_addr.addrlen,
+            )
+        } {
+            SOCKET_ERROR => Err(wsa_error()),
+            _ => Ok(Self(s)),
+        }
+    }
+    pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.0.local_addr()
+    }
+    pub fn peer_addr(&self) -> io::Result<SocketAddr> {
+        self.0.peer_addr()
     }
     pub fn take_error(&self) -> io::Result<Option<io::Error>> {
         self.0.take_error()

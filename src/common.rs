@@ -7,9 +7,7 @@ pub fn startup() -> io::Result<()> {
     let mut wsa_data = WSADATA::default();
     match WSA_ERROR(unsafe { WinSock::WSAStartup(0x202, &mut wsa_data) }) {
         WSA_ERROR(0) => Ok(()),
-        WSASYSNOTREADY => Err(io::Error::other(
-            "Network subsystem not ready",
-        )),
+        WSASYSNOTREADY => Err(io::Error::other("Network subsystem not ready")),
         WSAVERNOTSUPPORTED => Err(io::Error::new(
             io::ErrorKind::Unsupported,
             "Winsock version not supported",
@@ -23,9 +21,7 @@ pub fn startup() -> io::Result<()> {
             io::ErrorKind::InvalidInput,
             "Invalid parameter",
         )),
-        _ => Err(io::Error::other(
-            "Unknown WSAStartup error",
-        )),
+        _ => Err(io::Error::other("Unknown WSAStartup error")),
     }
 }
 pub fn wsa_error() -> io::Error {
