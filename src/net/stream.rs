@@ -1,7 +1,8 @@
 use crate::common::*;
 use crate::net::{Socket, SocketAddr, socketaddr_un};
+use std::time::Duration;
 use std::{io, path::Path};
-use windows::Win32::Networking::WinSock::{self, SOCKET_ERROR};
+use windows::Win32::Networking::WinSock::{self, SO_RCVTIMEO, SO_SNDTIMEO, SOCKET_ERROR};
 
 pub struct UnixStream(pub Socket);
 impl UnixStream {
@@ -40,6 +41,18 @@ impl UnixStream {
     }
     pub fn set_nonblocking(&self, nonblocking: bool) -> io::Result<()> {
         self.0.set_nonblocking(nonblocking)
+    }
+    pub fn set_read_timeout(&self, timeout: Option<Duration>) -> io::Result<()> {
+        self.0.set_timeout(timeout, SO_RCVTIMEO)
+    }
+    pub fn set_write_timeout(&self, timeout: Option<Duration>) -> io::Result<()> {
+        self.0.set_timeout(timeout, SO_SNDTIMEO)
+    }
+    pub fn read_timeout(&self) -> io::Result<Option<Duration>> {
+        self.0.timeout(SO_RCVTIMEO)
+    }
+    pub fn write_timeout(&self) -> io::Result<Option<Duration>> {
+        self.0.timeout(SO_SNDTIMEO)
     }
 }
 

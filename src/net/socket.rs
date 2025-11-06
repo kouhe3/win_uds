@@ -5,6 +5,7 @@ use std::{
         raw::c_int,
         windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
     },
+    time::Duration,
 };
 
 use windows::{
@@ -105,7 +106,7 @@ impl Socket {
     }
     pub fn take_error(&self) -> io::Result<Option<io::Error>> {
         unsafe {
-            let mut val: c_int = 0;
+            let mut val = c_int::default();
             let mut len = size_of::<c_int>() as i32;
             match WinSock::getsockopt(
                 self.0,
@@ -130,6 +131,35 @@ impl Socket {
         match unsafe { WinSock::ioctlsocket(self.0, FIONBIO, &mut val as *mut _) } {
             SOCKET_ERROR => Err(wsa_error()),
             _ => Ok(()),
+        }
+    }
+    pub fn set_timeout(&self, dur: Option<Duration>, kind: i32) -> io::Result<()> {
+        let timeout = match dur {
+            Some(dur) => dur.as_millis() as u32,
+            None => 0,
+        };
+        match unsafe { WinSock::setsockopt(self.0, SOL_SOCKET, kind, Some(&timeout.to_ne_bytes())) }
+        {
+            SOCKET_ERROR => Err(wsa_error()),
+            _ => Ok(()),
+        }
+    }
+    //seems like not support
+    //https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-getsockopt
+    pub fn timeout(&self, kind: i32) -> io::Result<Option<Duration>> {
+        let mut val = c_int::default();
+        let mut len = size_of::<c_int>();
+        match unsafe {
+            WinSock::getsockopt(
+                self.0,
+                SOL_SOCKET,
+                kind,
+                PSTR::from_raw(&mut val as *mut _ as *mut _),
+                &mut len as *mut _ as *mut _,
+            )
+        } {
+            SOCKET_ERROR => Err(wsa_error()),
+            _ => Ok(Some(Duration::from_millis(val as u64))),
         }
     }
 }
