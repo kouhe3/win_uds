@@ -1,4 +1,4 @@
-use std::io::{Read, Write};
+use std::io::{self, Read, Write};
 use std::thread;
 use std::time::Duration;
 use win_uds::net::{UnixListener, UnixStream};
@@ -37,16 +37,27 @@ fn write_time_out() {
     let listener = UnixListener::bind(&path).unwrap();
     let srv = std::thread::spawn(move || {
         let (mut stream, _) = listener.accept().unwrap();
-        let buf = vec![b'X'; 64 * 1024];
+        let buf = vec![b'X'; 1024 * 1024];
         stream
             .set_write_timeout(Some(Duration::from_secs(1)))
             .unwrap();
-        assert!(stream.write(buf.as_slice()).is_err());
+        loop {
+            match stream.write(buf.as_slice()) {
+                Ok(_n) => continue,
+                Err(e) => {
+                    if e.kind() == io::ErrorKind::TimedOut {
+                        break;
+                    } else {
+                        panic!("Expected TimedOut");
+                    }
+                }
+            }
+        }
     });
 
     let path_clone = path.clone();
     let cli = std::thread::spawn(move || {
-        let mut stream = UnixStream::connect(&path_clone).unwrap();
+        let mut _stream = UnixStream::connect(&path_clone).unwrap();
         std::thread::sleep(Duration::from_secs(3))
     });
 

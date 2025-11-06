@@ -13,7 +13,7 @@ impl UnixStream {
     }
     pub fn connect_addr(socket_addr: &SockAddr) -> io::Result<Self> {
         let s = Socket::new(Domain::UNIX, Type::STREAM, None)?;
-        s.connect(&socket_addr)?;
+        s.connect(socket_addr)?;
         Ok(Self(s))
     }
 }
