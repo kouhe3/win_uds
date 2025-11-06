@@ -3,8 +3,8 @@
 uds for windows
 
 ## TODO
-[] Document
-[] Async
+- [ ] Document
+- [ ] Async
 
 ## see also
 * https://github.com/tokio-rs/mio/pull/1667/
