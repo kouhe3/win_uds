@@ -14,9 +14,7 @@ impl Socket {
         unsafe {
             startup()?;
             match WinSock::socket(AF_UNIX as _, SOCK_STREAM, WSA_FLAG_OVERLAPPED as _)? {
-                INVALID_SOCKET => {
-                    Err(wsa_error())
-                }
+                INVALID_SOCKET => Err(wsa_error()),
                 s => Ok(Self(s)),
             }
         }

@@ -1,12 +1,10 @@
 use std::{io, mem, path::Path};
 
-use windows::Win32::Networking::WinSock::{
-    self, SOCKADDR_UN, SOCKET_ERROR,
-};
+use windows::Win32::Networking::WinSock::{self, SOCKADDR_UN, SOCKET_ERROR};
 
 use crate::{
     common::{startup, wsa_error},
-    net::{Socket, addr::SocketAddr, socketaddr_un, stream::UnixStream},
+    net::{Socket, SocketAddr, UnixStream, socketaddr_un},
 };
 pub struct UnixListener(Socket);
 
@@ -15,12 +13,8 @@ impl UnixListener {
         unsafe {
             startup()?;
             let s = Socket::new()?;
-            let addr = socketaddr_un(path)?;
-            match WinSock::bind(
-                s.0,
-                &addr as *const _ as *const _,
-                size_of::<SOCKADDR_UN>() as _,
-            ) {
+            let (addr, len) = socketaddr_un(path.as_ref())?;
+            match WinSock::bind(s.0, &addr as *const _ as *const _, len) {
                 SOCKET_ERROR => Err(wsa_error()),
                 _ => Ok(Self(s)),
             }
@@ -32,7 +26,7 @@ impl UnixListener {
             let addrlen = size_of::<SOCKADDR_UN>() as _;
             let s = self
                 .0
-                .accept(Some(&mut addr as *mut _ as *mut _), Some(addrlen as _))?;
+                .accept(Some(&mut addr as *mut _ as *mut _), Some(addrlen as *mut _))?;
             Ok((UnixStream(s), SocketAddr { addr, addrlen }))
         }
     }
