@@ -13,7 +13,7 @@ impl Socket {
     pub fn new() -> io::Result<Self> {
         unsafe {
             startup()?;
-            match WinSock::socket(AF_UNIX as _, SOCK_STREAM, WSA_FLAG_OVERLAPPED as _)? {
+            match WinSock::socket(AF_UNIX as _, SOCK_STREAM, 0)? {
                 INVALID_SOCKET => Err(wsa_error()),
                 s => Ok(Self(s)),
             }
