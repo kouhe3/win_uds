@@ -1,16 +1,33 @@
 use std::io;
 
-use windows::Win32::{
-    Foundation::{NO_ERROR, WIN32_ERROR},
-    Networking::WinSock::{self, WSADATA, WSAGetLastError},
-};
+use windows::Win32::Networking::WinSock::{self, WSA_ERROR, WSADATA, WSAGetLastError};
 
 pub fn startup() -> io::Result<()> {
-    let err = WIN32_ERROR(unsafe { WinSock::WSAStartup(0x202, &mut WSADATA::default()) } as _);
-    if err != NO_ERROR {
-        Err(io::Error::other(format!("WSAStartup failed: {:?}", err)))
-    } else {
-        Ok(())
+    use WinSock::{WSAEFAULT, WSAEINPROGRESS, WSAEPROCLIM, WSASYSNOTREADY, WSAVERNOTSUPPORTED};
+    let mut wsa_data = WSADATA::default();
+    match WSA_ERROR(unsafe { WinSock::WSAStartup(0x202, &mut wsa_data) }) {
+        WSA_ERROR(0) => Ok(()),
+        WSASYSNOTREADY => Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Network subsystem not ready",
+        )),
+        WSAVERNOTSUPPORTED => Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "Winsock version not supported",
+        )),
+        WSAEINPROGRESS => Err(io::Error::new(
+            io::ErrorKind::WouldBlock,
+            "Blocking operation in progress",
+        )),
+        WSAEPROCLIM => Err(io::Error::new(io::ErrorKind::Other, "Too many tasks")),
+        WSAEFAULT => Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Invalid parameter",
+        )),
+        _ => Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Unknown WSAStartup error",
+        )),
     }
 }
 pub fn wsa_error() -> io::Error {
