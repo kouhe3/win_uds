@@ -24,6 +24,24 @@ impl UnixListener {
             }
         }
     }
+    pub fn bind_addr(socket_addr: &SocketAddr) -> io::Result<Self> {
+        unsafe {
+            let s = Socket::new()?;
+            if WinSock::bind(
+                s.0,
+                &socket_addr.addr as *const _ as *const _,
+                socket_addr.addrlen,
+            ) == SOCKET_ERROR
+            {
+                Err(wsa_error())
+            } else {
+                match WinSock::listen(s.0, SOMAXCONN as _) {
+                    SOCKET_ERROR => Err(wsa_error()),
+                    _ => Ok(Self(s)),
+                }
+            }
+        }
+    }
     pub fn accept(&self) -> io::Result<(UnixStream, SocketAddr)> {
         let mut addr = SOCKADDR_UN::default();
         let mut addrlen = size_of::<SOCKADDR_UN>() as _;
@@ -33,7 +51,7 @@ impl UnixListener {
         )?;
         Ok((UnixStream(s), SocketAddr { addr, addrlen }))
     }
-    pub fn local_addr(&self)->io::Result<SocketAddr>{
+    pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.0.local_addr()
     }
 }
