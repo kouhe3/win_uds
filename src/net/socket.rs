@@ -1,4 +1,8 @@
-use std::{io, net::Shutdown};
+use std::{
+    io, mem,
+    net::Shutdown,
+    os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
+};
 
 use windows::Win32::Networking::WinSock::{
     self, AF_UNIX, INVALID_SOCKET, SEND_RECV_FLAGS, SOCK_STREAM, SOCKADDR, SOCKET, SOCKET_ERROR,
@@ -62,5 +66,30 @@ impl Socket {
                 s => Ok(Socket(s)),
             }
         }
+    }
+}
+
+impl Drop for Socket {
+    fn drop(&mut self) {
+        let _ = unsafe { WinSock::closesocket(self.0) };
+    }
+}
+impl AsRawSocket for Socket {
+    fn as_raw_socket(&self) -> RawSocket {
+        self.0.0 as RawSocket
+    }
+}
+
+impl FromRawSocket for Socket {
+    unsafe fn from_raw_socket(sock: RawSocket) -> Self {
+        Socket(SOCKET(sock as _))
+    }
+}
+
+impl IntoRawSocket for Socket {
+    fn into_raw_socket(self) -> RawSocket {
+        let ret = self.0.0 as RawSocket;
+        mem::forget(self);
+        ret
     }
 }
