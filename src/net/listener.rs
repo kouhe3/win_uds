@@ -3,15 +3,12 @@ use std::{io, path::Path};
 use socket2::{Domain, Type};
 use windows::Win32::Networking::WinSock::SOMAXCONN;
 
-use crate::{
-    common::startup,
-    net::{SockAddr, Socket, UnixStream},
-};
+use crate::net::{SockAddr, Socket, UnixStream};
 pub struct UnixListener(Socket);
 
 impl UnixListener {
     pub fn bind<P: AsRef<Path>>(path: P) -> io::Result<Self> {
-        startup()?;
+        //startup()?;
         let addr = SockAddr::unix(path)?;
         Self::bind_addr(&addr)
     }

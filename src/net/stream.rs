@@ -1,4 +1,3 @@
-use crate::common::*;
 use crate::net::{SockAddr, Socket};
 use socket2::{Domain, Type};
 use std::ops::{Deref, DerefMut};
@@ -7,7 +6,6 @@ use std::{io, path::Path};
 pub struct UnixStream(pub Socket);
 impl UnixStream {
     pub fn connect<P: AsRef<Path>>(path: P) -> io::Result<Self> {
-        startup()?;
         let addr = SockAddr::unix(path)?;
         Self::connect_addr(&addr)
     }

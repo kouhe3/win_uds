@@ -33,11 +33,15 @@ fn echo() {
 }
 #[test]
 fn too_long_path() {
-    let path = "o".repeat(256);
+    let tmp = std::env::temp_dir();
+    let path = tmp.join("o".repeat(256));
+    let _ = std::fs::remove_file(&path);
     assert!(UnixListener::bind(&path).is_err());
 }
 #[test]
 fn zero_path() {
-    let path = "oo\0oo";
+    let tmp = std::env::temp_dir();
+    let path = tmp.join("oo\0oo");
+    let _ = std::fs::remove_file(&path);
     assert!(UnixListener::bind(&path).is_err());
 }
