@@ -31,3 +31,13 @@ fn win_uds_echo() {
     srv.join().unwrap();
     let _ = std::fs::remove_file(&sock_path_clone);
 }
+#[test]
+fn too_long_path(){
+    let path = "o".repeat(256);
+    assert!(UnixListener::bind(&path).is_err());
+}
+#[test]
+fn zero_path(){
+    let path = "oo\0oo";
+    assert!(UnixListener::bind(&path).is_err());
+}
