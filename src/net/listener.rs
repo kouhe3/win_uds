@@ -1,8 +1,6 @@
 use std::{io, path::Path};
 
 use socket2::{Domain, Type};
-use windows::Win32::Networking::WinSock::SOMAXCONN;
-
 use crate::net::{SockAddr, Socket, UnixStream};
 pub struct UnixListener(Socket);
 
@@ -15,7 +13,7 @@ impl UnixListener {
     pub fn bind_addr(socket_addr: &SockAddr) -> io::Result<Self> {
         let s = Socket::new(Domain::UNIX, Type::STREAM, None)?;
         s.bind(socket_addr)?;
-        s.listen(SOMAXCONN as _)?;
+        s.listen(5)?;
         Ok(Self(s))
     }
     pub fn accept(&self) -> io::Result<(UnixStream, SockAddr)> {
