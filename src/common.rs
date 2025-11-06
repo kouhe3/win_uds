@@ -1,8 +1,8 @@
-use std::{io, path::Path, ptr};
+use std::io;
 
 use windows::Win32::{
     Foundation::{NO_ERROR, WIN32_ERROR},
-    Networking::WinSock::{self, ADDRESS_FAMILY, AF_UNIX, SOCKADDR_UN, WSADATA, WSAGetLastError},
+    Networking::WinSock::{self, WSADATA, WSAGetLastError},
 };
 
 pub fn startup() -> io::Result<()> {
@@ -79,15 +79,4 @@ pub fn wsa_error() -> io::Error {
         _ => "Windows Sockets error",
     };
     io::Error::new(kind, format!("{} (error code: {:?})", description, err))
-}
-
-pub fn socketaddr_un(path: impl AsRef<Path>) -> io::Result<SOCKADDR_UN> {
-    let bytes = path.as_ref().as_os_str().as_encoded_bytes();
-    let mut addr = SOCKADDR_UN::default();
-    if bytes.len() > addr.sun_path.len() {
-        return Err(io::Error::new(io::ErrorKind::InvalidInput, "path too long"));
-    }
-    addr.sun_family = ADDRESS_FAMILY(AF_UNIX);
-    unsafe { ptr::copy_nonoverlapping(bytes.as_ptr() as _, &mut addr.sun_path, bytes.len()) };
-    Ok(addr)
 }
