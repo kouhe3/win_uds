@@ -8,18 +8,17 @@ fn win_uds_echo() {
     let _ = std::fs::remove_file(&sock_path);
     let listener = UnixListener::bind(&sock_path).unwrap();
     let srv = std::thread::spawn(move || {
-        let (mut stream, _) = listener.accept().expect("accept failed");
+        let (mut stream, addr) = listener.accept().expect("accept failed");
         let mut buf = [0u8; 128];
-        loop {
-            let n = match stream.read(&mut buf) {
-                Ok(0) => break, // 对端关闭
-                Ok(n) => n,
-                Err(e) => panic!("read error: {}", e),
-            };
-            stream.write_all(&buf[..n]).expect("write_all failed");
-        }
+        let n = match stream.read(&mut buf) {
+            Ok(n) => n,
+            Err(e) => panic!("read error: {}", e),
+        };
+        stream.write_all(&buf[..n]).expect("write_all failed");
     });
+
     let sock_path_clone = sock_path.clone();
+
     let cli = std::thread::spawn(move || {
         let mut stream = UnixStream::connect(&sock_path).unwrap();
         let req = b"Hello, world!";

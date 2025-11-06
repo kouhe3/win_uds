@@ -7,8 +7,7 @@ pub fn startup() -> io::Result<()> {
     let mut wsa_data = WSADATA::default();
     match WSA_ERROR(unsafe { WinSock::WSAStartup(0x202, &mut wsa_data) }) {
         WSA_ERROR(0) => Ok(()),
-        WSASYSNOTREADY => Err(io::Error::new(
-            io::ErrorKind::Other,
+        WSASYSNOTREADY => Err(io::Error::other(
             "Network subsystem not ready",
         )),
         WSAVERNOTSUPPORTED => Err(io::Error::new(
@@ -19,13 +18,12 @@ pub fn startup() -> io::Result<()> {
             io::ErrorKind::WouldBlock,
             "Blocking operation in progress",
         )),
-        WSAEPROCLIM => Err(io::Error::new(io::ErrorKind::Other, "Too many tasks")),
+        WSAEPROCLIM => Err(io::Error::other("Too many tasks")),
         WSAEFAULT => Err(io::Error::new(
             io::ErrorKind::InvalidInput,
             "Invalid parameter",
         )),
-        _ => Err(io::Error::new(
-            io::ErrorKind::Other,
+        _ => Err(io::Error::other(
             "Unknown WSAStartup error",
         )),
     }

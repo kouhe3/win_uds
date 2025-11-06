@@ -2,7 +2,6 @@ use std::{io, net::Shutdown};
 
 use windows::Win32::Networking::WinSock::{
     self, AF_UNIX, INVALID_SOCKET, SEND_RECV_FLAGS, SOCK_STREAM, SOCKADDR, SOCKET, SOCKET_ERROR,
-    WSA_FLAG_OVERLAPPED,
 };
 
 use crate::common::{startup, wsa_error};

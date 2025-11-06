@@ -1,7 +1,7 @@
 use crate::common::*;
 use crate::net::{Socket, socketaddr_un};
 use std::{io, path::Path};
-use windows::Win32::Networking::WinSock::{self, SOCKADDR_UN, SOCKET_ERROR};
+use windows::Win32::Networking::WinSock::{self, SOCKET_ERROR};
 
 pub struct UnixStream(pub Socket);
 impl UnixStream {
@@ -9,16 +9,10 @@ impl UnixStream {
         unsafe {
             startup()?;
             let s = Socket::new()?;
-            let addr = socketaddr_un(path.as_ref())?;
-            let err = WinSock::connect(
-                s.0,
-                &addr as *const _ as *const _,
-                size_of::<SOCKADDR_UN>() as _,
-            );
-            if err == SOCKET_ERROR {
-                Err(wsa_error())
-            } else {
-                Ok(Self(s))
+            let (addr, len) = socketaddr_un(path.as_ref())?;
+            match WinSock::connect(s.0, &addr as *const _ as *const _, len) {
+                SOCKET_ERROR => Err(wsa_error()),
+                _ => Ok(Self(s)),
             }
         }
     }

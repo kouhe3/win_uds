@@ -1,4 +1,4 @@
-use std::{io, path::Path, ptr};
+use std::{io, path::Path};
 
 use windows::Win32::Networking::WinSock::{ADDRESS_FAMILY, AF_UNIX, SOCKADDR_UN};
 
@@ -26,11 +26,13 @@ pub fn socketaddr_un(path: &Path) -> io::Result<(SOCKADDR_UN, i32)> {
             "path must be shorter than SUN_LEN",
         ));
     }
+    let src_i8 = unsafe { std::slice::from_raw_parts(bytes.as_ptr() as *const i8, bytes.len()) };
     sockaddr.sun_family = ADDRESS_FAMILY(AF_UNIX);
-    unsafe { ptr::copy_nonoverlapping(bytes.as_ptr() as _, &mut sockaddr.sun_path, bytes.len()) };
+    sockaddr.sun_path[..src_i8.len()].copy_from_slice(src_i8);
     let socklen = size_of::<SOCKADDR_UN>() as _;
     Ok((sockaddr, socklen))
 }
+#[derive(Debug)]
 pub struct SocketAddr {
     pub addr: SOCKADDR_UN,
     pub addrlen: i32,
