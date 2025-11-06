@@ -6,7 +6,6 @@ pub struct UnixListener(Socket);
 
 impl UnixListener {
     pub fn bind<P: AsRef<Path>>(path: P) -> io::Result<Self> {
-        //startup()?;
         let addr = SockAddr::unix(path)?;
         Self::bind_addr(&addr)
     }
