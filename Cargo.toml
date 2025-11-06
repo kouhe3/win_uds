@@ -2,6 +2,8 @@
 name = "win_uds"
 version = "0.1.0"
 edition = "2024"
-
+license-file = "LICENSE"
+description = "Windows Unix Domain Socket"
+repository = "https://github.com/kouhe3/win_uds"
 [dependencies]
 socket2 = "0.6.1"
