@@ -54,4 +54,7 @@ impl UnixListener {
     pub fn local_addr(&self) -> io::Result<SocketAddr> {
         self.0.local_addr()
     }
+    pub fn take_error(&self) -> io::Result<Option<io::Error>> {
+        self.0.take_error()
+    }
 }

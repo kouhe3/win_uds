@@ -1,11 +1,18 @@
 use std::{
     io, mem,
     net::Shutdown,
-    os::windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
+    os::{
+        raw::c_int,
+        windows::io::{AsRawSocket, FromRawSocket, IntoRawSocket, RawSocket},
+    },
 };
 
-use windows::Win32::Networking::WinSock::{
-    self, AF_UNIX, INVALID_SOCKET, SEND_RECV_FLAGS, SOCK_STREAM, SOCKADDR, SOCKET, SOCKET_ERROR,
+use windows::{
+    Win32::Networking::WinSock::{
+        self, AF_UNIX, INVALID_SOCKET, SEND_RECV_FLAGS, SO_ERROR, SOCK_STREAM, SOCKADDR, SOCKET,
+        SOCKET_ERROR, SOL_SOCKET,
+    },
+    core::{PSTR, s},
 };
 
 use crate::{
@@ -81,6 +88,28 @@ impl Socket {
         } {
             SOCKET_ERROR => Err(wsa_error()),
             _ => Ok(addr),
+        }
+    }
+    pub fn take_error(&self) -> io::Result<Option<io::Error>> {
+        unsafe {
+            let mut val: c_int = 0;
+            let mut len = size_of::<c_int>() as i32;
+            match WinSock::getsockopt(
+                self.0,
+                SOL_SOCKET,
+                SO_ERROR,
+                PSTR::from_raw(&mut val as *mut _ as *mut _),
+                &mut len as *mut _,
+            ) {
+                SOCKET_ERROR => Err(wsa_error()),
+                _ => {
+                    if val == 0 {
+                        Ok(None)
+                    } else {
+                        Ok(Some(wsa_error()))
+                    }
+                }
+            }
         }
     }
 }
