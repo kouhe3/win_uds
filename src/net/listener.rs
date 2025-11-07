@@ -9,6 +9,20 @@ use std::{
 pub struct UnixListener(pub Socket);
 
 impl UnixListener {
+    /// Creates a new `UnixListener` bound to the specified socket.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    ///
+    /// let listener = match UnixListener::bind("/path/to/the/socket") {
+    ///     Ok(sock) => sock,
+    ///     Err(e) => {
+    ///         println!("Couldn't connect: {:?}", e);
+    ///         return
+    ///     }
+    /// };
+    /// ```
     pub fn bind<P: AsRef<Path>>(path: P) -> io::Result<Self> {
         let addr = SockAddr::unix(path)?;
         Self::bind_addr(&addr)
@@ -19,6 +33,25 @@ impl UnixListener {
         s.listen(5)?;
         Ok(Self(s))
     }
+    /// Accepts a new incoming connection to this listener.
+    ///
+    /// This function will block the calling thread until a new Unix connection
+    /// is established. When established, the corresponding [`UnixStream`] and
+    /// the remote peer's address will be returned.
+    ///
+    /// [`UnixStream`]: struct.UnixStream.html
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    ///
+    /// let listener = UnixListener::bind("/path/to/the/socket").unwrap();
+    ///
+    /// match listener.accept() {
+    ///     Ok((socket, addr)) => println!("Got a client: {:?}", addr),
+    ///     Err(e) => println!("accept function failed: {:?}", e),
+    /// }
+    /// ```
     pub fn accept(&self) -> io::Result<(UnixStream, SockAddr)> {
         let (s, addr) = self.0.accept()?;
         Ok((UnixStream(s), addr))

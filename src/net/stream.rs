@@ -6,6 +6,20 @@ use std::{io, path::Path};
 
 pub struct UnixStream(pub Socket);
 impl UnixStream {
+    /// Connects to the socket named by `path`.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    ///
+    /// let socket = match UnixStream::connect("/tmp/sock") {
+    ///     Ok(sock) => sock,
+    ///     Err(e) => {
+    ///         println!("Couldn't connect: {:?}", e);
+    ///         return
+    ///     }
+    /// };
+    /// ```
     pub fn connect<P: AsRef<Path>>(path: P) -> io::Result<Self> {
         let addr = SockAddr::unix(path)?;
         Self::connect_addr(&addr)
