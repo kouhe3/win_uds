@@ -293,7 +293,7 @@ checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
 
 [[package]]
 name = "win_uds"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "futures",
  "socket2",
