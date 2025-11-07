@@ -20,7 +20,7 @@ dependencies = [
 
 [[package]]
 name = "win_uds"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "socket2",
 ]
