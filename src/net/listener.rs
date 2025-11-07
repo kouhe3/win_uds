@@ -56,6 +56,24 @@ impl UnixListener {
         let (s, addr) = self.0.accept()?;
         Ok((UnixStream(s), addr))
     }
+
+    /// Creates a new independently owned handle to the underlying socket.
+    ///
+    /// The returned `UnixListener` is a reference to the same socket that this
+    /// object references. Both handles can be used to accept incoming
+    /// connections and options set on one listener will affect the other.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    ///
+    /// let listener = UnixListener::bind("/path/to/the/socket").unwrap();
+    ///
+    /// let listener_copy = listener.try_clone().expect("Couldn't clone socket");
+    /// ```
+    pub fn try_clone(&self) -> io::Result<UnixListener> {
+        self.0.try_clone().map(UnixListener)
+    }
 }
 impl AsSocket for UnixListener {
     fn as_socket(&self) -> std::os::windows::prelude::BorrowedSocket<'_> {

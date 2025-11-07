@@ -29,6 +29,24 @@ impl UnixStream {
         s.connect(socket_addr)?;
         Ok(Self(s))
     }
+
+    /// Creates a new independently owned handle to the underlying socket.
+    ///
+    /// The returned `UnixStream` is a reference to the same stream that this
+    /// object references. Both handles will read and write the same stream of
+    /// data, and options set on one stream will be propagated to the other
+    /// stream.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    ///
+    /// let socket = UnixStream::connect("/tmp/sock").unwrap();
+    /// let sock_copy = socket.try_clone().expect("Couldn't clone socket");
+    /// ```
+    pub fn try_clone(&self) -> io::Result<UnixStream> {
+        self.0.try_clone().map(UnixStream)
+    }
 }
 impl Deref for UnixStream {
     type Target = Socket;
