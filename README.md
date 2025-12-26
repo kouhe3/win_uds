@@ -1,6 +1,7 @@
 # win uds
 
 uds for windows
+a small wrapper for socket2
 
 ## see also
 * https://github.com/tokio-rs/mio/pull/1667/
