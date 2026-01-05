@@ -1,4 +1,4 @@
-use crate::net::{SockAddr, Socket, UnixStream};
+use crate::net::{SockAddr, Socket, UnixStream, validate_path};
 use socket2::{Domain, Type};
 use std::{
     io,
@@ -13,8 +13,7 @@ impl UnixListener {
     ///
     /// # Examples
     ///
-    /// ```no_run
-    ///
+    /// ```ignore
     /// let listener = match UnixListener::bind("/path/to/the/socket") {
     ///     Ok(sock) => sock,
     ///     Err(e) => {
@@ -24,6 +23,7 @@ impl UnixListener {
     /// };
     /// ```
     pub fn bind<P: AsRef<Path>>(path: P) -> io::Result<Self> {
+        validate_path(&path)?;
         let addr = SockAddr::unix(path)?;
         Self::bind_addr(&addr)
     }
@@ -43,8 +43,7 @@ impl UnixListener {
     ///
     /// # Examples
     ///
-    /// ```no_run
-    ///
+    /// ```ignore
     /// let listener = UnixListener::bind("/path/to/the/socket").unwrap();
     ///
     /// match listener.accept() {
@@ -65,8 +64,7 @@ impl UnixListener {
     ///
     /// # Examples
     ///
-    /// ```no_run
-    ///
+    /// ```ignore
     /// let listener = UnixListener::bind("/path/to/the/socket").unwrap();
     ///
     /// let listener_copy = listener.try_clone().expect("Couldn't clone socket");
