@@ -170,6 +170,53 @@ async fn async_connect_nonexistent() {
     assert!(result.is_err());
 }
 
+#[tokio::test]
+async fn async_concurrent_accept() -> io::Result<()> {
+    let tmp = std::env::temp_dir();
+    let path = tmp.join("test_async_concurrent.sock");
+    let _ = std::fs::remove_file(&path);
+
+    let listener = AsyncListener::bind(&path)?;
+
+    // Spawn 3 clients
+    let mut client_handles = Vec::new();
+    for i in 0..3u8 {
+        let path_clone = path.clone();
+        client_handles.push(tokio::spawn(async move {
+            let mut client = AsyncStream::connect(&path_clone).await.unwrap();
+            client.write_all(&[i]).await.unwrap();
+            client.flush().await.unwrap();
+
+            let mut buf = [0u8; 1];
+            client.read_exact(&mut buf).await.unwrap();
+            assert_eq!(buf[0], i + 10);
+        }));
+    }
+
+    // Accept concurrently using separate tasks
+    let mut accept_handles = Vec::new();
+    for _ in 0..3 {
+        let listener_clone = listener.try_clone()?;
+        accept_handles.push(tokio::spawn(async move {
+            let (mut server, _addr) = listener_clone.accept().await.unwrap();
+            let mut buf = [0u8; 1];
+            server.read_exact(&mut buf).await.unwrap();
+            server.write_all(&[buf[0] + 10]).await.unwrap();
+            server.flush().await.unwrap();
+        }));
+    }
+
+    for handle in client_handles {
+        handle.await.unwrap();
+    }
+    for handle in accept_handles {
+        handle.await.unwrap();
+    }
+
+    let _ = std::fs::remove_file(&path);
+    Ok(())
+}
+
 // Sync tests remain unchanged
 use io::Read;
 
