@@ -1,4 +1,4 @@
-use crate::net::{SockAddr, Socket};
+use crate::net::{SockAddr, Socket, validate_path};
 use socket2::{Domain, Type};
 use std::ops::{Deref, DerefMut};
 use std::os::windows::io::{AsRawSocket, AsSocket, IntoRawSocket};
@@ -10,8 +10,7 @@ impl UnixStream {
     ///
     /// # Examples
     ///
-    /// ```no_run
-    ///
+    /// ```ignore
     /// let socket = match UnixStream::connect("/tmp/sock") {
     ///     Ok(sock) => sock,
     ///     Err(e) => {
@@ -21,6 +20,7 @@ impl UnixStream {
     /// };
     /// ```
     pub fn connect<P: AsRef<Path>>(path: P) -> io::Result<Self> {
+        validate_path(&path)?;
         let addr = SockAddr::unix(path)?;
         Self::connect_addr(&addr)
     }
@@ -39,8 +39,7 @@ impl UnixStream {
     ///
     /// # Examples
     ///
-    /// ```no_run
-    ///
+    /// ```ignore
     /// let socket = UnixStream::connect("/tmp/sock").unwrap();
     /// let sock_copy = socket.try_clone().expect("Couldn't clone socket");
     /// ```
@@ -87,3 +86,6 @@ impl IntoRawSocket for UnixStream {
         self.0.into_raw_socket()
     }
 }
+
+// SAFETY: UnixStream wraps a socket which is safe for async I/O polling
+unsafe impl async_io::IoSafe for UnixStream {}
