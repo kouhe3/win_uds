@@ -1,8 +1,8 @@
 [package]
 name = "win_uds"
-version = "0.1.5"
+version = "0.2.0"
 edition = "2024"
-license-file = "LICENSE"
+license = "Unlicense"
 description = "Windows Unix Domain Socket"
 repository = "https://github.com/kouhe3/win_uds"
 [package.metadata.docs.rs]
