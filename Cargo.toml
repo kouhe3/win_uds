@@ -6,7 +6,7 @@ license = "Unlicense"
 description = "Windows Unix Domain Socket"
 repository = "https://github.com/kouhe3/win_uds"
 keywords = ["windows", "unix", "socket", "uds"]
-categories = ["network-programming", "os::windows", "api-bindings"]
+categories = ["network-programming", "os::windows-apis", "api-bindings"]
 
 [package.metadata.docs.rs]
 all-features = true
