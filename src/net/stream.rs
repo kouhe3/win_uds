@@ -88,4 +88,5 @@ impl IntoRawSocket for UnixStream {
 }
 
 // SAFETY: UnixStream wraps a socket which is safe for async I/O polling
+#[cfg(feature = "async")]
 unsafe impl async_io::IoSafe for UnixStream {}

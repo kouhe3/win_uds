@@ -4,7 +4,10 @@ pub use listener::*;
 pub use socket2::SockAddr;
 use socket2::Socket;
 pub use stream::*;
+
+#[cfg(feature = "async")]
 mod async_uds;
+#[cfg(feature = "async")]
 pub use async_uds::*;
 
 use std::ffi::OsStr;
