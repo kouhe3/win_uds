@@ -391,7 +391,7 @@ checksum = "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
 
 [[package]]
 name = "win_uds"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "async-io",
  "futures",
