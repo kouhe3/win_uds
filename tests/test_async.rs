@@ -3,7 +3,7 @@
 use std::io;
 
 use futures::{AsyncReadExt, AsyncWriteExt};
-use win_uds::net::{AsyncListener, AsyncStream, UnixListener, UnixStream};
+use win_uds::net::{AsyncListener, AsyncStream};
 
 #[tokio::test]
 async fn async_echo() -> io::Result<()> {
