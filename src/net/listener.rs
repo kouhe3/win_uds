@@ -30,7 +30,7 @@ impl UnixListener {
     pub fn bind_addr(socket_addr: &SockAddr) -> io::Result<Self> {
         let s = Socket::new(Domain::UNIX, Type::STREAM, None)?;
         s.bind(socket_addr)?;
-        s.listen(5)?;
+        s.listen(128)?;
         Ok(Self(s))
     }
     /// Accepts a new incoming connection to this listener.
